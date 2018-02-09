@@ -196,6 +196,10 @@ typedef uint8_t VL53L0X_GpioFunctionality;
 // based on VL53L0X_decode_vcsel_period()
 #define decodeVcselPeriod(reg_val)      (((reg_val) + 1) << 1)
 
+// Encode VCSEL pulse period register value from period in PCLKs
+// based on VL53L0X_encode_vcsel_period()
+#define encodeVcselPeriod(period_pclks) (((period_pclks) >> 1) - 1)
+
 // Calculate macro period in *nanoseconds* from VCSEL period in PCLKs
 // based on VL53L0X_calc_macro_period_ps()
 // PLL_period_ps = 1655; macro_period_vclks = 2304
@@ -265,7 +269,6 @@ uint16_t ReadRegister16(uint8_t addr, uint8_t reg);
 void ReadRegisters(uint8_t addr, uint8_t dataAddress, uint8_t *pData, uint8_t nCount);
 void VL53L0X_SetAddress(uint8_t newAddr);
 void VL53L0X_DataInit(VL53L0XDEV *p53);
-bool VL53L0X_SetSignalRateLimit(uint8_t addr, float limit_Mcps);
 bool VL53L0X_StaticInit(VL53L0XDEV *p53);
 bool VL53L0X_GetSpadInfo(VL53L0XDEV *p53, uint8_t *count, bool *typeIsAperture);
 void VL53L0X_SetReferenceSpads(uint8_t addr, uint8_t *count, bool *typeIsAperture, uint8_t *spadMap);
@@ -279,7 +282,6 @@ uint32_t VL53L0X_timeoutMclksToMicroseconds(uint16_t timeout_period_mclks, uint8
 uint32_t VL53L0X_timeoutMicrosecondsToMclks(uint32_t timeout_period_us, uint8_t vcsel_period_pclks);
 uint16_t VL53L0X_decodeTimeout(uint16_t reg_val);
 uint16_t VL53L0X_encodeTimeout(uint16_t timeout_mclks);
-bool VL53L0X_setMeasurementTimingBudget(VL53L0XDEV *p53);
 bool VL53L0X_PerformRefCalibration(VL53L0XDEV *p53);
 bool VL53L0X_performSingleRefCalibration(VL53L0XDEV *p53, uint8_t vhv_init_byte);
 void VL53L0X_SetTimeout(VL53L0XDEV *p53, uint16_t timeout);
@@ -297,6 +299,9 @@ void VL53L0X_ContinuousReading(VL53L0XDEV *p53, uint32_t period_ms);
 void VL53L0X_StopContinuous(VL53L0XDEV *p53);
 uint16_t VL53L0X_ReadRange(VL53L0XDEV *p53);
 bool VL53L0X_TimeoutOccurred(VL53L0XDEV *p53);
+bool VL53L0X_SetVcselPulsePeriod(VL53L0XDEV *p53, vcselPeriodType type, uint8_t period_pclks);
+bool VL53L0X_SetSignalRateLimit(uint8_t addr, float limit_Mcps);
+bool VL53L0X_setMeasurementTimingBudget(VL53L0XDEV *p53);
 
 
 /*

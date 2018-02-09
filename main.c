@@ -38,6 +38,16 @@
 #include "mcc_generated_files/mcc.h"
 #include "drivers/vl53l0x.h"
 
+/*
+ * Before enabling see readme file
+ */
+//#define LONG_RANGE
+//#define HIGH_ACCURACY
+//#define HIGH_SPEED
+//#define SINGLE_SHOT
+#define CONTINUOUS
+
+
 void ClearLeds() {
     LED_1_SetHigh();
     LED_2_SetHigh();
@@ -56,14 +66,47 @@ void main(void)
     
     VL53L0X_InitDevices();
     
+#ifdef LONG_RANGE
+    VL53L0X_SetSignalRateLimit(&vl53l0xDev[LASER0].address, 0.1);
+    VL53L0X_SetSignalRateLimit(&vl53l0xDev[LASER1].address, 0.1);
+    VL53L0X_SetVcselPulsePeriod(&vl53l0xDev[LASER0], vcselPeriodType.VcselPeriodPreRange, 18);
+    VL53L0X_SetVcselPulsePeriod(&vl53l0xDev[LASER1], vcselPeriodType.VcselPeriodPreRange, 18);
+    VL53L0X_SetVcselPulsePeriod(&vl53l0xDev[LASER0], vcselPeriodType.VcselPeriodFinalRange, 14);
+    VL53L0X_SetVcselPulsePeriod(&vl53l0xDev[LASER1], vcselPeriodType.VcselPeriodFinalRange, 14);
+#endif
+    
+#ifdef HIGH_ACCURACY
+    vl53l0xDev[LASER0].measurement_timing_budget_us = 200000;   //200msec (def. 33msec)
+    vl53l0xDev[LASER1].measurement_timing_budget_us = 200000;
+    VL53L0X_setMeasurementTimingBudget(&vl53l0xDev[LASER0]);
+    VL53L0X_setMeasurementTimingBudget(&vl53l0xDev[LASER1]);
+#endif
+    
+#ifdef HIGH_SPEED
+    vl53l0xDev[LASER0].measurement_timing_budget_us = 20000;    //20msec
+    vl53l0xDev[LASER1].measurement_timing_budget_us = 20000;
+    VL53L0X_setMeasurementTimingBudget(&vl53l0xDev[LASER0]);
+    VL53L0X_setMeasurementTimingBudget(&vl53l0xDev[LASER1]);
+#endif
+    
+#ifdef CONTINUOUS
     VL53L0X_ContinuousReading(&vl53l0xDev[LASER0], 0);
     VL53L0X_ContinuousReading(&vl53l0xDev[LASER1], 0);
-        
+#endif
+    
     while(1) {
-        uint16_t tmp0 = VL53L0X_ReadRange(&vl53l0xDev[LASER0]);
-        uint16_t tmp1 = VL53L0X_ReadRange(&vl53l0xDev[LASER1]);
+        
         uint16_t tmp;
         
+#ifdef CONTINUOUS
+        uint16_t tmp0 = VL53L0X_ReadRange(&vl53l0xDev[LASER0]);
+        uint16_t tmp1 = VL53L0X_ReadRange(&vl53l0xDev[LASER1]);
+#endif
+
+#ifdef SINGLE_SHOT
+        uint16_t tmp0 = VL53L0X_SingleShotReading(&vl53l0xDev[LASER0]);
+        uint16_t tmp1 = VL53L0X_SingleShotReading(&vl53l0xDev[LASER1]);
+#endif        
         //60cm of maximum distance
         if (tmp0 < 600 && tmp1 < 600) {
             if (tmp1 > tmp0) {
