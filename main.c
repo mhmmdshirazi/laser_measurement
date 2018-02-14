@@ -41,7 +41,7 @@
 /*
  * Before enabling see readme file
  */
-//#define LONG_RANGE
+//#define LONG_RANGE        // Can be used also with CONTINUOUS
 //#define HIGH_ACCURACY
 //#define HIGH_SPEED
 //#define SINGLE_SHOT
@@ -67,8 +67,14 @@ void main(void)
     VL53L0X_InitDevices();
     
 #ifdef LONG_RANGE
-    VL53L0X_SetSignalRateLimit(&vl53l0xDev[LASER0].address, 0.1);
-    VL53L0X_SetSignalRateLimit(&vl53l0xDev[LASER1].address, 0.1);
+    /*
+     * Important note:
+     * These two commented functions don't work here. You should set 0.1 value directly into
+     * VL53L0X_DataInit function (default is 0.25)
+     */
+    // VL53L0X_SetSignalRateLimit(&vl53l0xDev[LASER0].address, 0.1);
+    // VL53L0X_SetSignalRateLimit(&vl53l0xDev[LASER1].address, 0.1);
+    
     VL53L0X_SetVcselPulsePeriod(&vl53l0xDev[LASER0], vcselPeriodType.VcselPeriodPreRange, 18);
     VL53L0X_SetVcselPulsePeriod(&vl53l0xDev[LASER1], vcselPeriodType.VcselPeriodPreRange, 18);
     VL53L0X_SetVcselPulsePeriod(&vl53l0xDev[LASER0], vcselPeriodType.VcselPeriodFinalRange, 14);
